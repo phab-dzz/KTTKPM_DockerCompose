@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  nodeapp:
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mongo_data:
